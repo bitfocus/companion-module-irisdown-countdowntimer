@@ -146,7 +146,7 @@ instance.prototype.actions = function(system) {
 			]
 		 },
 		'displayM':  {
-			label: 'Change dispaly mode',
+			label: 'Change display mode',
 			options: [
 			 {
 					type: 'dropdown',
