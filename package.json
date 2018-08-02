@@ -1,0 +1,15 @@
+{
+  "name": "irisdown-countdowntimer",
+  "version": "0.0.1",
+  "description": "Module to control Irisdown Countdown timer 2.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "countdown",
+    "timer"
+  ],
+  "author": "Per Roine",
+  "license": "MIT"
+}
