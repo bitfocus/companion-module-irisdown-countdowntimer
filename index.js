@@ -1,6 +1,5 @@
 var tcp = require('../../tcp');
 var instance_skel = require('../../instance_skel');
-var ping = require('ping');
 var debug;
 var log;
 
@@ -19,8 +18,9 @@ instance.prototype.updateConfig = function(config) {
 	var self = this;
 
 	self.lastState = self.STATE_UNKNOWN;
-
+	self.init_tcp();
 	self.config = config;
+	self.init_presets();
 };
 
 instance.prototype.init = function() {
@@ -28,24 +28,8 @@ instance.prototype.init = function() {
 
 	debug = self.debug;
 	log = self.log;
-
-	self.status(self.STATE_UNKNOWN, 'Checking ping response');
-
-	self.timer = setInterval(function () {
-		ping.sys.probe(self.config.host, function(isAlive) {
-			if (isAlive) {
-				if (self.lastState !== self.STATE_OK && self.lastState !== self.STATE_ERROR) {
-					self.status(self.STATE_OK);
-					self.lastState = self.STATE_OK;
-				}
-			} else {
-				if (self.lastState != self.STATE_WARNING) {
-					self.status(self.STATE_WARNING, 'No ping response');
-					self.lastState = self.STATE_WARNING;
-				}
-			}
-		}, { timeout: 2 });
-	}, 5000);
+	self.init_tcp();
+	self.init_presets();
 };
 
 instance.prototype.init_tcp = function(cb) {
@@ -125,6 +109,153 @@ instance.prototype.destroy = function() {
 	debug("destroy", self.id);;
 };
 
+instance.prototype.init_presets = function () {
+	var self = this;
+	var presets = [];
+
+		presets.push({
+			category: 'Timer',
+			label: 'GO',
+			bank: {
+				style: 'text',
+				text: 'GO',
+				size: '24',
+				color: '16777215',
+				bgcolor: self.rgb(0,255,0)
+			},
+			actions: [
+				{
+					action: 'go',
+				}
+			]
+		});
+
+		presets.push({
+			category: 'Timer',
+			label: 'Pause',
+			bank: {
+				style: 'text',
+				text: 'PAUSE',
+				size: '18',
+				color: self.rgb(0,0,0),
+				bgcolor: self.rgb(255,255,0)
+			},
+			actions: [
+				{
+					action: 'pause',
+				}
+			]
+		});
+
+		presets.push({
+			category: 'Timer',
+			label: 'Reset',
+			bank: {
+				style: 'text',
+				text: 'RESET',
+				size: '18',
+				color: self.rgb(255,255,255),
+				bgcolor: self.rgb(0,0,255)
+			},
+			actions: [
+				{
+					action: 'reset',
+				}
+			]
+		});
+
+		presets.push({
+			category: 'Timer',
+			label: 'Set 5 min',
+			bank: {
+				style: 'text',
+				text: 'SET\\n5 MIN',
+				size: '18',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,255)
+			},
+			actions: [
+				{
+					action: 'resetT',
+					options: {
+						time: '5',
+					}
+				}
+			]
+		});
+
+		presets.push({
+			category: 'Timer',
+			label: 'Set 10 min',
+			bank: {
+				style: 'text',
+				text: 'SET\\n10 MIN',
+				size: '18',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,255)
+			},
+			actions: [
+				{
+					action: 'resetT',
+					options: {
+						time: '10',
+					}
+				}
+			]
+		});
+
+		presets.push({
+			category: 'Timer',
+			label: 'Set 15 min',
+			bank: {
+				style: 'text',
+				text: 'SET\\n15 MIN',
+				size: '18',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,255)
+			},
+			actions: [
+				{
+					action: 'resetT',
+					options: {
+						time: '15',
+					}
+				}
+			]
+		});
+
+		presets.push({
+			category: 'Timer',
+			label: 'Black ',
+			bank: {
+				style: 'text',
+				text: 'BLACK',
+				size: '18',
+				color: '16777215',
+				bgcolor: self.rgb(0,0,255),
+				latch: true
+			},
+			actions: [
+				{
+					action: 'displayM',
+					options: {
+						mode: 'BLACK',
+					}
+				}
+			],
+			release_actions: [
+				{
+					action: 'displayM',
+					options: {
+						mode: 'TIMER',
+					}
+				}
+			]
+		});
+
+
+	self.setPresetDefinitions(presets);
+}
 
 instance.prototype.actions = function(system) {
 	var self = this;
