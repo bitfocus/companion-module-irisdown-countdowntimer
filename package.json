@@ -1,15 +1,16 @@
 {
   "name": "irisdown-countdowntimer",
-  "version": "0.0.1",
+  "version": "1.0.0",
+	"api_version": "1.0.0",
+	"keywords": [ "Software", "Timing" ],
+	"manufacturer": "Irisdown",
+	"product": "Countdown Timer",
+	"shortname": "countdown",
   "description": "Module to control Irisdown Countdown timer 2.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "countdown",
-    "timer"
-  ],
-  "author": "Per Roine",
+  "author": "Per Røine <per.roine@gmail.com>",
   "license": "MIT"
 }

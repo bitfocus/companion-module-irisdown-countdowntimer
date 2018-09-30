@@ -345,11 +345,5 @@ instance.prototype.action = function(action) {
 
 };
 
-instance.module_info = {
-	label: 'Irisdown Countdown timer 2.0',
-	id: 'irisdown-countdowntimer',
-	version: '0.0.1'
-};
-
 instance_skel.extendedBy(instance);
 exports = module.exports = instance;
