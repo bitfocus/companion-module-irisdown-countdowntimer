@@ -11,13 +11,17 @@ function instance(system, id, config) {
 
 	self.actions(); // export actions
 
+	self.feedbackstate = {
+		time: '00:00:00',
+		state: 'STOPPED'
+	};
+
 	return self;
 }
 
 instance.prototype.updateConfig = function(config) {
 	var self = this;
 
-	self.lastState = self.STATE_UNKNOWN;
 	self.init_tcp();
 	self.config = config;
 	self.init_presets();
@@ -30,6 +34,104 @@ instance.prototype.init = function() {
 	log = self.log;
 	self.init_tcp();
 	self.init_presets();
+	self.init_feedbacks();
+	self.init_variables();
+};
+
+instance.prototype.init_feedbacks = function() {
+	var self = this;
+
+	var feedbacks = {
+		state_color: {
+			label: 'Change color from state',
+			description: 'Change the colors of a bank according to the timer state',
+			options: [
+				{
+					type: 'colorpicker',
+					label: 'Running: Foreground color',
+					id: 'run_fg',
+					default: self.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Running: Background color',
+					id: 'run_bg',
+					default: self.rgb(255,0,0)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Paused: Foreground color',
+					id: 'pause_fg',
+					default: self.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Paused: Background color',
+					id: 'pause_bg',
+					default: self.rgb(255,0,0)
+				}
+			]
+		}
+	};
+
+	self.setFeedbackDefinitions(feedbacks);
+};
+
+instance.prototype.init_variables = function() {
+	var self = this;
+
+	var variables = [
+		{
+			label: 'State of timer (Running, Paused, Stopped)',
+			name: 'state'
+		},
+		{
+			label: 'Current time of timer (hh:mm:ss)',
+			name: 'time'
+		},
+		{
+			label: 'Current time of timer (hh:mm)',
+			name: 'time_hm'
+		},
+		{
+			label: 'Current time of timer (hours)',
+			name: 'time_h'
+		},
+		{
+			label: 'Current time of timer (minutes)',
+			name: 'time_m'
+		},
+		{
+			label: 'Current time of timer (seconds)',
+			name: 'time_s'
+		},
+	];
+
+	self.updateTime();
+	self.setVariableDefinitions(variables);
+};
+
+instance.prototype.updateTime = function() {
+	var self = this;
+	var info = self.feedbackstate.time.split(':');
+
+	self.setVariable('time', self.feedbackstate.time);
+	self.setVariable('time_hm', info[0] + ':' + info[1]);
+
+	self.setVariable('time_h', info[0]);
+	self.setVariable('time_m', info[1]);
+	self.setVariable('time_s', info[2]);
+};
+
+instance.prototype.updateState = function() {
+	var self = this;
+	var states = {
+		'PLAYING': 'Running',
+		'PAUSED': 'Paused',
+		'STOPPED': 'Stopped'
+	};
+
+	self.setVariable('state', states[self.feedbackstate.state]);
 };
 
 instance.prototype.init_tcp = function(cb) {
@@ -45,14 +147,24 @@ instance.prototype.init_tcp = function(cb) {
 
 		self.socket.on('error', function (err) {
 			debug("Network error", err);
-			self.status(self.STATE_ERROR, err.message);
+			self.status(self.STATUS_ERROR, err.message);
 			self.log('error',"Network error: " + err.message);
 		});
 
 		self.socket.on('connect', function () {
-			if (self.lastState != self.STATE_OK) {
-				self.status(self.STATE_OK);
-				self.lastState = self.STATE_OK;
+			if (self.currentStatus != self.STATUS_OK) {
+				self.status(self.STATUS_OK);
+
+				self.feedbackstate = {
+					time: '00:00:00',
+					state: 'STOPPED'
+				};
+
+				self.socket.send("UPDATES ON \n");
+				self.socket.receivebuffer = '';
+
+				self.checkFeedbacks('state_color');
+				self.updateState();
 			}
 			debug("Connected");
 			if (typeof cb == 'function') {
@@ -60,7 +172,37 @@ instance.prototype.init_tcp = function(cb) {
 			}
 		})
 
-		self.socket.on('data', function (data) {});
+		// separate buffered stream into lines with responses
+		self.socket.on('data', function (chunk) {
+			var i = 0, line = '', offset = 0;
+
+			self.socket.receivebuffer += chunk;
+
+			while ( (i = self.socket.receivebuffer.indexOf('\r\n', offset)) !== -1) {
+				line = self.socket.receivebuffer.substr(offset, i - offset);
+				offset = i + 2;
+				self.socket.emit('receiveline', line.toString());
+			}
+			self.socket.receivebuffer = self.socket.receivebuffer.substr(offset);
+		});
+
+		self.socket.on('receiveline', function (data) {
+			var info = data.toString().split(/ /);
+
+			if (info.length == 2) {
+
+				if (self.feedbackstate.state != info[1]) {
+					self.feedbackstate.state = info[1];
+					self.checkFeedbacks('state_color');
+					self.updateState();
+				}
+
+				if (self.feedbackstate.time != info[0]) {
+					self.feedbackstate.time = info[0];
+					self.updateTime();
+				}
+			}
+		});
 
 		self.socket.on('end', function () {
 			debug('Disconnected, ok');
@@ -89,6 +231,13 @@ instance.prototype.config_fields = function () {
 			label: 'Target IP',
 			width: 6,
 			regex: self.REGEX_IP
+		},
+		{
+			type: 'text',
+			id: 'info',
+			width: 6,
+			label: 'Feedback',
+			value: 'This module has support for getting information about the timer back to companion. But this feature requires Countdown Timer version 2.0.9 or later.'
 		}
 	]
 };
@@ -337,13 +486,36 @@ instance.prototype.action = function(action) {
 
 		debug('sending ',cmd,"to",self.config.host);
 
-		self.init_tcp(function () {
-			self.socket.send(cmd);
-		});
-
+		if (self.currentStatus != self.STATUS_OK) {
+			self.init_tcp(function () {
+				self.socket.send(cmd + " \n");
+			});
+		} else {
+			self.socket.send(cmd + " \n");
+		}
 	}
 
 };
+
+instance.prototype.feedback = function(feedback, bank) {
+	var self = this;
+
+	if (feedback.type = 'state_color') {
+		if (self.feedbackstate.state == 'PLAYING') {
+			return {
+				color: feedback.options.run_fg,
+				bgcolor: feedback.options.run_bg
+			};
+		}
+		else if (self.feedbackstate.state == 'PAUSED') {
+			return {
+				color: feedback.options.pause_fg,
+				bgcolor: feedback.options.pause_bg
+			}
+		}
+	}
+};
+
 
 instance_skel.extendedBy(instance);
 exports = module.exports = instance;
