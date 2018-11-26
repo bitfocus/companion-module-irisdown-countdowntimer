@@ -11,9 +11,12 @@ function instance(system, id, config) {
 
 	self.actions(); // export actions
 
+	self.lineEndings = '';
+
 	self.feedbackstate = {
 		time: '00:00:00',
-		state: 'STOPPED'
+		state: 'STOPPED',
+		mode: 'TIMER'
 	};
 
 	return self;
@@ -34,8 +37,6 @@ instance.prototype.init = function() {
 	log = self.log;
 	self.init_tcp();
 	self.init_presets();
-	self.init_feedbacks();
-	self.init_variables();
 };
 
 instance.prototype.init_feedbacks = function() {
@@ -71,6 +72,36 @@ instance.prototype.init_feedbacks = function() {
 					default: self.rgb(255,0,0)
 				}
 			]
+		},
+		mode_color: {
+			label: 'Change color from display mode',
+			description: 'Change the colors of a bank according to the current display mode',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Mode',
+					id: 'mode',
+					choices: [
+						{ id: 'TIMER', label: 'Timer'},
+						{ id: 'CLOCK', label: 'Clock'},
+						{ id: 'BLACK', label: 'Black'},
+						{ id: 'TEST',  label: 'Test'}
+					],
+					default: 'TIMER'
+				},
+				{
+					type: 'colorpicker',
+					label: 'Foreground color',
+					id: 'fg',
+					default: self.rgb(255,255,255)
+				},
+				{
+					type: 'colorpicker',
+					label: 'Background color',
+					id: 'bg',
+					default: self.rgb(255,0,0)
+				}
+			]
 		}
 	};
 
@@ -84,6 +115,10 @@ instance.prototype.init_variables = function() {
 		{
 			label: 'State of timer (Running, Paused, Stopped)',
 			name: 'state'
+		},
+		{
+			label: 'Mode of display (TIMER, CLOCK, BLACK, TEST)',
+			name: 'mode'
 		},
 		{
 			label: 'Current time of timer (hh:mm:ss)',
@@ -134,6 +169,12 @@ instance.prototype.updateState = function() {
 	self.setVariable('state', states[self.feedbackstate.state]);
 };
 
+instance.prototype.updateMode = function() {
+	var self = this;
+
+	self.setVariable('mode', self.feedbackstate.mode);
+};
+
 instance.prototype.init_tcp = function(cb) {
 	var self = this;
 
@@ -157,14 +198,12 @@ instance.prototype.init_tcp = function(cb) {
 
 				self.feedbackstate = {
 					time: '00:00:00',
-					state: 'STOPPED'
+					state: 'STOPPED',
+					mode: 'TIMER'
 				};
 
-				self.socket.send("UPDATES ON \n");
+				self.socket.send("VERSION\r\n");
 				self.socket.receivebuffer = '';
-
-				self.checkFeedbacks('state_color');
-				self.updateState();
 			}
 			debug("Connected");
 			if (typeof cb == 'function') {
@@ -190,6 +229,33 @@ instance.prototype.init_tcp = function(cb) {
 			var info = data.toString().split(/ /);
 
 			if (info.length == 2) {
+				if (info[0] == 'VERSION') {
+					// All versions that support the VERSION command supports update events
+					self.lineEndings = "\r\n";
+					self.socket.send("UPDATES ON\r\n");
+					self.log('info', 'Connected to Countdown Timer v' + info[1]);
+
+
+					self.init_feedbacks();
+					self.init_variables();
+
+					self.checkFeedbacks('state_color');
+					self.checkFeedbacks('mode_color');
+					self.updateState();
+					self.updateMode();
+
+					// Include feedback variables
+					self.init_presets(true);
+				}
+			}
+
+			if (info.length == 3) {
+
+				if (self.feedbackstate.mode != info[2]) {
+					self.feedbackstate.mode = info[2];
+					self.checkFeedbacks('mode_color');
+					self.updateMode();
+				}
 
 				if (self.feedbackstate.state != info[1]) {
 					self.feedbackstate.state = info[1];
@@ -258,150 +324,316 @@ instance.prototype.destroy = function() {
 	debug("destroy", self.id);;
 };
 
-instance.prototype.init_presets = function () {
+instance.prototype.init_presets = function (updates) {
 	var self = this;
 	var presets = [];
 
-		presets.push({
-			category: 'Timer',
-			label: 'GO',
-			bank: {
-				style: 'text',
-				text: 'GO',
-				size: '24',
-				color: '16777215',
-				bgcolor: self.rgb(0,255,0)
-			},
-			actions: [
-				{
-					action: 'go',
-				}
-			]
-		});
+	presets.push({
+		category: 'Timer control',
+		label: 'GO',
+		bank: {
+			style: 'text',
+			text: 'GO',
+			size: '24',
+			color: '16777215',
+			bgcolor: self.rgb(0,255,0)
+		},
+		actions: [
+			{
+				action: 'go',
+			}
+		]
+	});
 
-		presets.push({
-			category: 'Timer',
-			label: 'Pause',
-			bank: {
-				style: 'text',
-				text: 'PAUSE',
-				size: '18',
-				color: self.rgb(0,0,0),
-				bgcolor: self.rgb(255,255,0)
-			},
-			actions: [
-				{
-					action: 'pause',
-				}
-			]
-		});
+	presets.push({
+		category: 'Timer control',
+		label: 'Pause',
+		bank: {
+			style: 'text',
+			text: 'PAUSE',
+			size: '18',
+			color: self.rgb(0,0,0),
+			bgcolor: self.rgb(255,255,0)
+		},
+		actions: [
+			{
+				action: 'pause',
+			}
+		]
+	});
 
+	presets.push({
+		category: 'Timer control',
+		label: 'Reset',
+		bank: {
+			style: 'text',
+			text: 'RESET',
+			size: '18',
+			color: self.rgb(255,255,255),
+			bgcolor: self.rgb(0,0,255)
+		},
+		actions: [
+			{
+				action: 'reset',
+			}
+		]
+	});
+
+	presets.push({
+		category: 'Timer control',
+		label: 'Set 5 min',
+		bank: {
+			style: 'text',
+			text: 'SET\\n5 MIN',
+			size: '18',
+			color: '16777215',
+			bgcolor: self.rgb(0,0,255)
+		},
+		actions: [
+			{
+				action: 'resetT',
+				options: {
+					time: '5',
+				}
+			}
+		]
+	});
+
+	presets.push({
+		category: 'Timer control',
+		label: 'Set 10 min',
+		bank: {
+			style: 'text',
+			text: 'SET\\n10 MIN',
+			size: '18',
+			color: '16777215',
+			bgcolor: self.rgb(0,0,255)
+		},
+		actions: [
+			{
+				action: 'resetT',
+				options: {
+					time: '10',
+				}
+			}
+		]
+	});
+
+	presets.push({
+		category: 'Timer control',
+		label: 'Set 15 min',
+		bank: {
+			style: 'text',
+			text: 'SET\\n15 MIN',
+			size: '18',
+			color: '16777215',
+			bgcolor: self.rgb(0,0,255)
+		},
+		actions: [
+			{
+				action: 'resetT',
+				options: {
+					time: '15',
+				}
+			}
+		]
+	});
+
+	presets.push({
+		category: 'Mode',
+		label: 'Black',
+		bank: {
+			style: 'text',
+			text: 'BLACK',
+			size: '18',
+			color: self.rgb(255,255,255),
+			bgcolor: self.rgb(0,0,0)
+		},
+		actions: [
+			{
+				action: 'displayM',
+				options: {
+					mode: 'BLACK',
+				}
+			}
+		],
+		feedbacks: [
+			{
+				type: 'mode_color',
+				options: {
+					bg: self.rgb(0,0,255),
+					fg: self.rgb(255,255,255),
+					mode: 'BLACK'
+				}
+			}
+		]
+	});
+
+	presets.push({
+		category: 'Mode',
+		label: 'Timer',
+		bank: {
+			style: 'text',
+			text: 'TIMER',
+			size: '18',
+			color: self.rgb(255,255,255),
+			bgcolor: self.rgb(0,0,0)
+		},
+		actions: [
+			{
+				action: 'displayM',
+				options: {
+					mode: 'TIMER',
+				}
+			}
+		],
+		feedbacks: [
+			{
+				type: 'mode_color',
+				options: {
+					bg: self.rgb(0,0,255),
+					fg: self.rgb(255,255,255),
+					mode: 'TIMER'
+				}
+			}
+		]
+	});
+
+	presets.push({
+		category: 'Mode',
+		label: 'Clock',
+		bank: {
+			style: 'text',
+			text: 'CLOCK',
+			size: '18',
+			color: self.rgb(255,255,255),
+			bgcolor: self.rgb(0,0,0)
+		},
+		actions: [
+			{
+				action: 'displayM',
+				options: {
+					mode: 'CLOCK',
+				}
+			}
+		],
+		feedbacks: [
+			{
+				type: 'mode_color',
+				options: {
+					bg: self.rgb(0,0,255),
+					fg: self.rgb(255,255,255),
+					mode: 'CLOCK'
+				}
+			}
+		]
+	});
+
+	presets.push({
+		category: 'Mode',
+		label: 'Test',
+		bank: {
+			style: 'text',
+			text: 'TEST',
+			size: '18',
+			color: self.rgb(255,255,255),
+			bgcolor: self.rgb(0,0,0)
+		},
+		actions: [
+			{
+				action: 'displayM',
+				options: {
+					mode: 'TEST',
+				}
+			}
+		],
+		feedbacks: [
+			{
+				type: 'mode_color',
+				options: {
+					bg: self.rgb(0,0,255),
+					fg: self.rgb(255,255,255),
+					mode: 'TEST'
+				}
+			}
+		]
+	});
+
+	if (updates) {
+		// Show timer
 		presets.push({
-			category: 'Timer',
-			label: 'Reset',
+			category: 'Display time',
+			label: 'Hours',
 			bank: {
 				style: 'text',
-				text: 'RESET',
-				size: '18',
+				text: '$(label:time_h)',
+				size: 'auto',
 				color: self.rgb(255,255,255),
-				bgcolor: self.rgb(0,0,255)
+				bgcolor: 6619136
 			},
-			actions: [
+			actions: [],
+			feedbacks: [
 				{
-					action: 'reset',
+					options: {
+	          pause_fg: 16777215,
+	          pause_bg: 7954688,
+	          run_fg: 16777215,
+	          run_bg: 26112
+	        },
+	        type: "state_color",
 				}
 			]
 		});
 
 		presets.push({
-			category: 'Timer',
-			label: 'Set 5 min',
+			category: 'Display time',
+			label: 'Minutes',
 			bank: {
 				style: 'text',
-				text: 'SET\\n5 MIN',
-				size: '18',
-				color: '16777215',
-				bgcolor: self.rgb(0,0,255)
+				text: '$(label:time_m)',
+				size: 'auto',
+				color: self.rgb(255,255,255),
+				bgcolor: 6619136
 			},
-			actions: [
+			actions: [],
+			feedbacks: [
 				{
-					action: 'resetT',
 					options: {
-						time: '5',
-					}
+	          pause_fg: 16777215,
+	          pause_bg: 7954688,
+	          run_fg: 16777215,
+	          run_bg: 26112
+	        },
+	        type: "state_color",
 				}
 			]
 		});
 
 		presets.push({
-			category: 'Timer',
-			label: 'Set 10 min',
+			category: 'Display time',
+			label: 'Seconds',
 			bank: {
 				style: 'text',
-				text: 'SET\\n10 MIN',
-				size: '18',
-				color: '16777215',
-				bgcolor: self.rgb(0,0,255)
+				text: '$(label:time_s)',
+				size: 'auto',
+				color: self.rgb(255,255,255),
+				bgcolor: 6619136
 			},
-			actions: [
+			actions: [],
+			feedbacks: [
 				{
-					action: 'resetT',
 					options: {
-						time: '10',
-					}
+	          pause_fg: 16777215,
+	          pause_bg: 7954688,
+	          run_fg: 16777215,
+	          run_bg: 26112
+	        },
+	        type: "state_color",
 				}
 			]
 		});
 
-		presets.push({
-			category: 'Timer',
-			label: 'Set 15 min',
-			bank: {
-				style: 'text',
-				text: 'SET\\n15 MIN',
-				size: '18',
-				color: '16777215',
-				bgcolor: self.rgb(0,0,255)
-			},
-			actions: [
-				{
-					action: 'resetT',
-					options: {
-						time: '15',
-					}
-				}
-			]
-		});
-
-		presets.push({
-			category: 'Timer',
-			label: 'Black ',
-			bank: {
-				style: 'text',
-				text: 'BLACK',
-				size: '18',
-				color: '16777215',
-				bgcolor: self.rgb(0,0,255),
-				latch: true
-			},
-			actions: [
-				{
-					action: 'displayM',
-					options: {
-						mode: 'BLACK',
-					}
-				}
-			],
-			release_actions: [
-				{
-					action: 'displayM',
-					options: {
-						mode: 'TIMER',
-					}
-				}
-			]
-		});
-
+	}
 
 	self.setPresetDefinitions(presets);
 }
@@ -488,11 +720,12 @@ instance.prototype.action = function(action) {
 
 		if (self.currentStatus != self.STATUS_OK) {
 			self.init_tcp(function () {
-				self.socket.send(cmd + " \n");
+				self.socket.send(cmd + self.lineEndings);
 			});
 		} else {
-			self.socket.send(cmd + " \n");
+			self.socket.send(cmd + self.lineEndings);
 		}
+
 	}
 
 };
@@ -500,7 +733,7 @@ instance.prototype.action = function(action) {
 instance.prototype.feedback = function(feedback, bank) {
 	var self = this;
 
-	if (feedback.type = 'state_color') {
+	if (feedback.type == 'state_color') {
 		if (self.feedbackstate.state == 'PLAYING') {
 			return {
 				color: feedback.options.run_fg,
@@ -512,6 +745,14 @@ instance.prototype.feedback = function(feedback, bank) {
 				color: feedback.options.pause_fg,
 				bgcolor: feedback.options.pause_bg
 			}
+		}
+	}
+	if (feedback.type == 'mode_color') {
+		if (self.feedbackstate.mode == feedback.options.mode) {
+			return {
+				color: feedback.options.fg,
+				bgcolor: feedback.options.bg
+			};
 		}
 	}
 };
