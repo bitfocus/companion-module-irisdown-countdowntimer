@@ -217,9 +217,11 @@ instance.prototype.init_tcp = function(cb) {
 		self.socket = new tcp(self.config.host, 61002, { reconnect: false });
 
 		self.socket.on('error', function (err) {
-			debug("Network error", err);
+			if(self.currentStatus !== self.STATE_ERROR) {
+				debug("Network error", err);
+				self.log('error',"Network error: " + err.message);
+			}
 			self.status(self.STATUS_ERROR, err.message);
-			self.log('error',"Network error: " + err.message);
 		});
 
 		self.socket.on('connect', function () {
