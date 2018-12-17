@@ -19,6 +19,8 @@ function instance(system, id, config) {
 		mode: 'TIMER'
 	};
 
+	self.timer = undefined;
+
 	return self;
 }
 
@@ -35,7 +37,7 @@ instance.prototype.init = function() {
 
 	debug = self.debug;
 	log = self.log;
-	self.init_tcp();
+	self.start_connection_timer();
 	self.init_presets();
 };
 
@@ -175,6 +177,34 @@ instance.prototype.updateMode = function() {
 	self.setVariable('mode', self.feedbackstate.mode);
 };
 
+instance.prototype.start_connection_timer = function() {
+	var self = this;
+
+	// Stop the timer if it was already running
+	self.stop_connection_timer();
+
+	// Create a reconnect timer to watch the socket. If disconnected try to connect.
+	self.timer = setInterval(function() {
+
+		if (self.socket === undefined || self.socket.status === 2 /*STATUS_ERROR*/) {
+			// Not connected. Try to connect again.
+			self.init_tcp();
+		}
+
+	}, 5000);
+
+};
+
+instance.prototype.stop_connection_timer = function() {
+	var self = this;
+
+	if (self.timer !== undefined) {
+		clearInterval(self.timer);
+		delete self.timer;
+	}
+
+};
+
 instance.prototype.init_tcp = function(cb) {
 	var self = this;
 
@@ -272,6 +302,7 @@ instance.prototype.init_tcp = function(cb) {
 
 		self.socket.on('end', function () {
 			debug('Disconnected, ok');
+			self.status(self.STATUS_ERROR, "Socket ended");
 			self.socket.destroy();
 			delete self.socket;
 		});
@@ -312,10 +343,7 @@ instance.prototype.config_fields = function () {
 instance.prototype.destroy = function() {
 	var self = this;
 
-	if (self.timer) {
-		clearInterval(self.timer);
-		delete self.timer;
-	}
+	self.stop_connection_timer();
 
 	if (self.socket !== undefined) {
 		self.socket.destroy();
