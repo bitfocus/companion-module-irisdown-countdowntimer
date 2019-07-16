@@ -37,7 +37,7 @@ module.exports = {
 			label: 'Reset timer with new duration <time>',
 			options: [{
 					type: 'textinput',
-					label: '<time> mm for minutes or hh:mm for hours',
+					label: '<time> mm for minutes or hh:mm for hours and minutes or hh:mm:ss for all',
 					id: 'time',
 					default: ''
 			}]
