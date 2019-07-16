@@ -226,13 +226,12 @@ class instance extends instance_skel {
 
 			this.socket.on('receiveline', (data) => {
 				var info = data.toString().split(/ /);
-
 				if (info.length == 2) {
 					if (info[0] == 'VERSION') {
 						// All versions that support the VERSION command supports update events
 						this.lineEndings = "\r\n";
 						//Brainfreeze put version in function to check
-						if (this.compareVersion(info[1], "2.0.9") > 0) {
+						if (this.compareVersion(info[1], "2.0.9.3") > 0) {
 							this.socket.send("UPDATEMODE 2");
 						}
 
