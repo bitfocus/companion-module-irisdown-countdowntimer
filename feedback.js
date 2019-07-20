@@ -99,13 +99,13 @@ module.exports = {
 				options: [
 					{
 						type: 'colorpicker',
-						label: 'Message active',
+						label: 'Foreground color',
 						id: 'run_fg',
 						default: this.rgb(255,255,255)
 					},
 					{
 						type: 'colorpicker',
-						label: 'Message active',
+						label: 'Background color',
 						id: 'run_bg',
 						default: this.rgb(255,0,0)
 					}
