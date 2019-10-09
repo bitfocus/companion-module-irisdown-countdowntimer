@@ -47,6 +47,46 @@ module.exports = {
 
 			presets.push({
 				category: 'Timer control',
+				label: '+1 minute',
+				bank: {
+					style: 'text',
+					text: '+1 min',
+					size: '18',
+					color: this.rgb(0,0,0),
+					bgcolor: this.rgb(255,255,0)
+				},
+				actions: [
+					{
+						action: 'jog',
+						options: {
+							minutes: '1',
+						}
+					}
+				]
+			});
+
+			presets.push({
+				category: 'Timer control',
+				label: '-1 minute',
+				bank: {
+					style: 'text',
+					text: '-1 min',
+					size: '18',
+					color: this.rgb(0,0,0),
+					bgcolor: this.rgb(255,255,0)
+				},
+				actions: [
+					{
+						action: 'jog',
+						options: {
+							minutes: '-1',
+						}
+					}
+				]
+			});
+
+			presets.push({
+				category: 'Timer control',
 				label: 'Reset',
 				bank: {
 					style: 'text',
