@@ -48,6 +48,7 @@ module.exports = {
 					type: 'dropdown',
 					label: 'Display mode',
 					id: 'mode',
+					default: 'TIMER',
 					choices: [
 						{ id: 'TIMER', label: 'Timer'},
 						{ id: 'CLOCK', label: 'Clock'},
