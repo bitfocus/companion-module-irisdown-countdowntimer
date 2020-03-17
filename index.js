@@ -232,7 +232,7 @@ class instance extends instance_skel {
 						this.lineEndings = "\r\n";
 						//Brainfreeze put version in function to check
 						if (this.compareVersion(info[1], "2.0.9.3") > 0) {
-							this.socket.send("UPDATEMODE 2");
+							this.socket.send("UPDATEMODE 2\r\n");
 						}
 
 						this.socket.send("UPDATES ON\r\n");
