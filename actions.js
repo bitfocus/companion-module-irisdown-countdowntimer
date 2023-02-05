@@ -86,7 +86,7 @@ export function compileActionDefinitions(self) {
 		options: [
 			{
 				type: 'textinput',
-				label: '<time> mm, mm:ss or hh:mm:ss (use leading zero)',
+				label: '<time> mm or hh:mm:ss (use leading zero)',
 				id: 'time',
 				default: '',
 			},
