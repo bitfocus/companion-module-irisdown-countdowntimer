@@ -1,361 +1,444 @@
-module.exports = {
+import { combineRgb } from '@companion-module/base'
 
-		/**
-		* Get the available presets.
-		*
-		* @returns {Object[]} the available feedbacks
-		* @access public
-		* @since 1.1.0
-		*/
+/**
+ * Get the available presets.
+ *
+ * @returns {Object[]} the available feedbacks
+ * @access public
+ * @since 1.1.0
+ */
+export function compilePresetDefinitions() {
+	const presets = {}
 
-		getPresets(updates) {
-			var presets = [];
-
-			presets.push({
-				category: 'Timer control',
-				label: 'GO',
-				bank: {
-					style: 'text',
-					text: 'GO',
-					size: '24',
-					color: '16777215',
-					bgcolor: this.rgb(0, 255, 0),
-				},
-				actions: [
+	presets['timer-go'] = {
+		type: 'button',
+		category: 'Timer control',
+		name: 'GO',
+		style: {
+			text: 'GO',
+			size: '24',
+			color: '16777215',
+			bgcolor: combineRgb(0, 255, 0),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'go',
+						actionId: 'go',
+						options: {},
 					},
-				]
-			});
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
 
-			presets.push({
-				category: 'Timer control',
-				label: 'Pause',
-				bank: {
-					style: 'text',
-					text: 'PAUSE',
-					size: '18',
-					color: this.rgb(0,0,0),
-					bgcolor: this.rgb(255,255,0)
-				},
-				actions: [
+	presets['timer-pause'] = {
+		type: 'button',
+		category: 'Timer control',
+		name: 'Pause',
+		style: {
+			text: 'PAUSE',
+			size: '18',
+			color: combineRgb(0, 0, 0),
+			bgcolor: combineRgb(255, 255, 0),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'pause',
-					}
-				]
-			});
+						actionId: 'pause',
+						options: {},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
 
-			presets.push({
-				category: 'Timer control',
-				label: '+1 minute',
-				bank: {
-					style: 'text',
-					text: '+1 min',
-					size: '18',
-					color: this.rgb(0,0,0),
-					bgcolor: this.rgb(255,255,0)
-				},
-				actions: [
+	presets['timer-minute-add'] = {
+		type: 'button',
+		category: 'Timer control',
+		name: '+1 minute',
+		style: {
+			text: '+1 min',
+			size: '18',
+			color: combineRgb(0, 0, 0),
+			bgcolor: combineRgb(255, 255, 0),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'jog',
+						actionId: 'jog',
 						options: {
 							minutes: '1',
-						}
-					}
-				]
-			});
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
 
-			presets.push({
-				category: 'Timer control',
-				label: '-1 minute',
-				bank: {
-					style: 'text',
-					text: '-1 min',
-					size: '18',
-					color: this.rgb(0,0,0),
-					bgcolor: this.rgb(255,255,0)
-				},
-				actions: [
+	presets['timer-minute-sub'] = {
+		type: 'button',
+		category: 'Timer control',
+		name: '-1 minute',
+		style: {
+			text: '-1 min',
+			size: '18',
+			color: combineRgb(0, 0, 0),
+			bgcolor: combineRgb(255, 255, 0),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'jog',
+						actionId: 'jog',
 						options: {
 							minutes: '-1',
-						}
-					}
-				]
-			});
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
 
-			presets.push({
-				category: 'Timer control',
-				label: 'Reset',
-				bank: {
-					style: 'text',
-					text: 'RESET',
-					size: '18',
-					color: this.rgb(255,255,255),
-					bgcolor: this.rgb(0,0,255)
-				},
-				actions: [
+	presets['timer-reset'] = {
+		type: 'button',
+		category: 'Timer control',
+		name: 'Reset',
+		style: {
+			text: 'RESET',
+			size: '18',
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 255),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'reset',
-					}
-				]
-			});
+						actionId: 'reset',
+						options: {},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
 
-			presets.push({
-				category: 'Timer control',
-				label: 'Set 5 min',
-				bank: {
-					style: 'text',
-					text: 'SET\\n5 MIN',
-					size: '18',
-					color: '16777215',
-					bgcolor: this.rgb(0,0,255)
-				},
-				actions: [
+	presets['timer-minutes-5'] = {
+		type: 'button',
+		category: 'Timer control',
+		name: 'Set 5 min',
+		style: {
+			text: 'SET\\n5 MIN',
+			size: '18',
+			color: '16777215',
+			bgcolor: combineRgb(0, 0, 255),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'resetT',
+						actionId: 'resetT',
 						options: {
 							time: '5',
-						}
-					}
-				]
-			});
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
 
-			presets.push({
-				category: 'Timer control',
-				label: 'Set 10 min',
-				bank: {
-					style: 'text',
-					text: 'SET\\n10 MIN',
-					size: '18',
-					color: '16777215',
-					bgcolor: this.rgb(0,0,255)
-				},
-				actions: [
+	presets['timer-minutes-10'] = {
+		type: 'button',
+		category: 'Timer control',
+		name: 'Set 10 min',
+		style: {
+			text: 'SET\\n10 MIN',
+			size: '18',
+			color: '16777215',
+			bgcolor: combineRgb(0, 0, 255),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'resetT',
+						actionId: 'resetT',
 						options: {
 							time: '10',
-						}
-					}
-				]
-			});
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
 
-			presets.push({
-				category: 'Timer control',
-				label: 'Set 15 min',
-				bank: {
-					style: 'text',
-					text: 'SET\\n15 MIN',
-					size: '18',
-					color: '16777215',
-					bgcolor: this.rgb(0,0,255)
-				},
-				actions: [
+	presets['timer-minutes-15'] = {
+		type: 'button',
+		category: 'Timer control',
+		name: 'Set 15 min',
+		style: {
+			text: 'SET\\n15 MIN',
+			size: '18',
+			color: '16777215',
+			bgcolor: combineRgb(0, 0, 255),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'resetT',
+						actionId: 'resetT',
 						options: {
 							time: '15',
-						}
-					}
-				]
-			});
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
 
-			presets.push({
-				category: 'Mode',
-				label: 'Black',
-				bank: {
-					style: 'text',
-					text: 'BLACK',
-					size: '18',
-					color: this.rgb(255,255,255),
-					bgcolor: this.rgb(0,0,0)
-				},
-				actions: [
+	presets['mode-black'] = {
+		type: 'button',
+		category: 'Mode',
+		name: 'Black',
+		style: {
+			text: 'BLACK',
+			size: '18',
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'displayM',
+						actionId: 'displayM',
 						options: {
 							mode: 'BLACK',
-						}
-					}
+						},
+					},
 				],
-				feedbacks: [
-					{
-						type: 'mode_color',
-						options: {
-							bg: this.rgb(0,0,255),
-							fg: this.rgb(255,255,255),
-							mode: 'BLACK'
-						}
-					}
-				]
-			});
-
-			presets.push({
-				category: 'Mode',
-				label: 'Timer',
-				bank: {
-					style: 'text',
-					text: 'TIMER',
-					size: '18',
-					color: this.rgb(255,255,255),
-					bgcolor: this.rgb(0,0,0)
+				up: [],
+			},
+		],
+		feedbacks: [
+			{
+				feedbackId: 'mode_color',
+				options: {
+					bg: combineRgb(0, 0, 255),
+					fg: combineRgb(255, 255, 255),
+					mode: 'BLACK',
 				},
-				actions: [
+			},
+		],
+	}
+
+	presets['mode-timer'] = {
+		type: 'button',
+		category: 'Mode',
+		name: 'Timer',
+		style: {
+			text: 'TIMER',
+			size: '18',
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'displayM',
+						actionId: 'displayM',
 						options: {
 							mode: 'TIMER',
-						}
-					}
+						},
+					},
 				],
-				feedbacks: [
-					{
-						type: 'mode_color',
-						options: {
-							bg: this.rgb(0,0,255),
-							fg: this.rgb(255,255,255),
-							mode: 'TIMER'
-						}
-					}
-				]
-			});
-
-			presets.push({
-				category: 'Mode',
-				label: 'Clock',
-				bank: {
-					style: 'text',
-					text: 'CLOCK',
-					size: '18',
-					color: this.rgb(255,255,255),
-					bgcolor: this.rgb(0,0,0)
+				up: [],
+			},
+		],
+		feedbacks: [
+			{
+				feedbackId: 'mode_color',
+				options: {
+					bg: combineRgb(0, 0, 255),
+					fg: combineRgb(255, 255, 255),
+					mode: 'TIMER',
 				},
-				actions: [
+			},
+		],
+	}
+
+	presets['mode-clock'] = {
+		type: 'button',
+		category: 'Mode',
+		name: 'Clock',
+		style: {
+			text: 'CLOCK',
+			size: '18',
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'displayM',
+						actionId: 'displayM',
 						options: {
 							mode: 'CLOCK',
-						}
-					}
+						},
+					},
 				],
-				feedbacks: [
-					{
-						type: 'mode_color',
-						options: {
-							bg: this.rgb(0,0,255),
-							fg: this.rgb(255,255,255),
-							mode: 'CLOCK'
-						}
-					}
-				]
-			});
-
-			presets.push({
-				category: 'Mode',
-				label: 'Test',
-				bank: {
-					style: 'text',
-					text: 'TEST',
-					size: '18',
-					color: this.rgb(255,255,255),
-					bgcolor: this.rgb(0,0,0)
+				up: [],
+			},
+		],
+		feedbacks: [
+			{
+				feedbackId: 'mode_color',
+				options: {
+					bg: combineRgb(0, 0, 255),
+					fg: combineRgb(255, 255, 255),
+					mode: 'CLOCK',
 				},
-				actions: [
+			},
+		],
+	}
+
+	presets['mode-test'] = {
+		type: 'button',
+		category: 'Mode',
+		name: 'Test',
+		style: {
+			text: 'TEST',
+			size: '18',
+			color: combineRgb(255, 255, 255),
+			bgcolor: combineRgb(0, 0, 0),
+		},
+		steps: [
+			{
+				down: [
 					{
-						action: 'displayM',
+						actionId: 'displayM',
 						options: {
 							mode: 'TEST',
-						}
-					}
+						},
+					},
 				],
-				feedbacks: [
-					{
-						type: 'mode_color',
-						options: {
-							bg: this.rgb(0,0,255),
-							fg: this.rgb(255,255,255),
-							mode: 'TEST'
-						}
-					}
-				]
-			});
+				up: [],
+			},
+		],
+		feedbacks: [
+			{
+				feedbackId: 'mode_color',
+				options: {
+					bg: combineRgb(0, 0, 255),
+					fg: combineRgb(255, 255, 255),
+					mode: 'TEST',
+				},
+			},
+		],
+	}
 
-			if (updates) {
-				// Show timer
-				presets.push({
-					category: 'Display time',
-					label: 'Hours',
-					bank: {
-						style: 'text',
-						text: '$(label:time_h)',
-						size: 'auto',
-						color: this.rgb(255,255,255),
-						bgcolor: 6619136
-					},
-					actions: [],
-					feedbacks: [
-						{
-							options: {
-								pause_fg: 16777215,
-								pause_bg: 7954688,
-								run_fg: 16777215,
-								run_bg: 26112
-							},
-							type: "state_color",
-						}
-					]
-				});
+	// Show timer
+	presets['display-hours'] = {
+		type: 'button',
+		category: 'Display time',
+		name: 'Hours',
+		style: {
+			text: '$(label:time_h)',
+			size: 'auto',
+			color: combineRgb(255, 255, 255),
+			bgcolor: 6619136,
+		},
+		steps: [
+			{
+				down: [],
+				up: [],
+			},
+		],
+		feedbacks: [
+			{
+				feedbackId: 'state_color',
+				options: {
+					pause_fg: 16777215,
+					pause_bg: 7954688,
+					run_fg: 16777215,
+					run_bg: 26112,
+				},
+			},
+		],
+	}
 
-				presets.push({
-					category: 'Display time',
-					label: 'Minutes',
-					bank: {
-						style: 'text',
-						text: '$(label:time_m)',
-						size: 'auto',
-						color: this.rgb(255,255,255),
-						bgcolor: 6619136
-					},
-					actions: [],
-					feedbacks: [
-						{
-							options: {
-								pause_fg: 16777215,
-								pause_bg: 7954688,
-								run_fg: 16777215,
-								run_bg: 26112
-							},
-							type: "state_color",
-						}
-					]
-				});
+	presets['display-minutes'] = {
+		type: 'button',
+		category: 'Display time',
+		name: 'Minutes',
+		style: {
+			text: '$(label:time_m)',
+			size: 'auto',
+			color: combineRgb(255, 255, 255),
+			bgcolor: 6619136,
+		},
+		steps: [
+			{
+				down: [],
+				up: [],
+			},
+		],
+		feedbacks: [
+			{
+				feedbackId: 'state_color',
+				options: {
+					pause_fg: 16777215,
+					pause_bg: 7954688,
+					run_fg: 16777215,
+					run_bg: 26112,
+				},
+			},
+		],
+	}
 
-				presets.push({
-					category: 'Display time',
-					label: 'Seconds',
-					bank: {
-						style: 'text',
-						text: '$(label:time_s)',
-						size: 'auto',
-						color: this.rgb(255,255,255),
-						bgcolor: 6619136
-					},
-					actions: [],
-					feedbacks: [
-						{
-							options: {
-								pause_fg: 16777215,
-								pause_bg: 7954688,
-								run_fg: 16777215,
-								run_bg: 26112
-							},
-							type: "state_color",
-						}
-					]
-				});
-			}
-			return presets;
-		}
-};
+	presets['display-seconds'] = {
+		type: 'button',
+		category: 'Display time',
+		name: 'Seconds',
+		style: {
+			text: '$(label:time_s)',
+			size: 'auto',
+			color: combineRgb(255, 255, 255),
+			bgcolor: 6619136,
+		},
+		steps: [
+			{
+				down: [],
+				up: [],
+			},
+		],
+		feedbacks: [
+			{
+				feedbackId: 'state_color',
+				options: {
+					pause_fg: 16777215,
+					pause_bg: 7954688,
+					run_fg: 16777215,
+					run_bg: 26112,
+				},
+			},
+		],
+	}
+
+	return presets
+}
