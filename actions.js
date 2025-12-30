@@ -75,10 +75,11 @@ export function compileActionDefinitions(self) {
 				id: 'minutes',
 				default: '1',
 				regex: '/-?([0-9])/',
+				useVariables: true,
 			},
 		],
-		callback: async (action) => {
-			await sendCommand(`JOG ${action.options.minutes}`)
+		callback: async (action, context) => {
+			await sendCommand(`JOG ${await context.parseVariablesInString(action.options.minutes)}`)
 		},
 	}
 	actions['resetT'] = {
@@ -89,10 +90,11 @@ export function compileActionDefinitions(self) {
 				label: '<time> mm or hh:mm:ss (use leading zero)',
 				id: 'time',
 				default: '',
+				useVariables: true,
 			},
 		],
-		callback: async (action) => {
-			await sendCommand(`RESET ${action.options.time}`)
+		callback: async (action, context) => {
+			await sendCommand(`RESET ${await context.parseVariablesInString(action.options.time)}`)
 		},
 	}
 	actions['displayM'] = {
