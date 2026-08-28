@@ -12,7 +12,7 @@
 		"url": "git+https://github.com/bitfocus/companion-module-irisdown-countdowntimer.git"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.1.1"
+		"@companion-module/base": "~1.4.3"
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^2.8.0"
