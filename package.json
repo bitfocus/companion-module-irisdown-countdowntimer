@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "companion-module-build",
-		"test": "node --experimental-vm-modules --test"
+		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"license": "MIT",
 	"repository": {
