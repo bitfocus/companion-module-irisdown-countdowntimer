@@ -4,6 +4,7 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
+		"build": "companion-module-build",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"license": "MIT",
@@ -12,9 +13,9 @@
 		"url": "git+https://github.com/bitfocus/companion-module-irisdown-countdowntimer.git"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.4.3"
+		"@companion-module/base": "~1.15.0"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^2.8.0"
+		"@companion-module/tools": "^2.9.0"
 	}
 }
